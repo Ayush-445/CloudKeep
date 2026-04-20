@@ -55,6 +55,11 @@ export default function DashboardContent({
 
       const res = await fetch(url);
       const data = await res.json();
+      if (!Array.isArray(data)) {
+        console.error("Invalid files response:", data);
+        setFiles([]); // prevent crash
+        return;
+      }
       setFiles(data);
     } catch (err) {
       console.error("Error fetching files", err);
@@ -66,11 +71,11 @@ export default function DashboardContent({
   }, [userId, refreshTrigger, currentFolder]);
 
   // 🔹 Filter files
-  const filteredFiles = files.filter((file) => {
+  const filteredFiles = Array.isArray(files)?files.filter((file) => {
     if (activeTab === "starred") return file.isStarred && !file.isTrash;
     if (activeTab === "trash") return file.isTrash;
     return !file.isTrash;
-  });
+  }):[];
 
   const starredCount = files.filter(
     (f) => f.isStarred && !f.isTrash
